@@ -8,8 +8,6 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-console.log(process.env.DB_USER);
-
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.vu0s8qh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -32,8 +30,13 @@ async function run() {
     const productCollection = client.db('emaJohnDB').collection('products');
 
     app.get('/products', async (req, res) => {
-      console.log('pagination', req.query);
-      const result = await productCollection.find().toArray();
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      console.log('pagination', page, size);
+      const result = await productCollection.find()
+      .skip(page * size)
+      .limit(size)
+      .toArray();
       res.send(result);
     })
 
