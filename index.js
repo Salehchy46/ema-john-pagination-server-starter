@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.vu0s8qh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 
@@ -34,9 +34,22 @@ async function run() {
       const size = parseInt(req.query.size);
       console.log('pagination', page, size);
       const result = await productCollection.find()
-      .skip(page * size)
-      .limit(size)
-      .toArray();
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      res.send(result);
+    })
+
+    app.post('/productByIds', async (req, res) => {
+      const ids = req.body;
+      const idsWithObjectId = ids.map(id => new ObjectId(id))
+      console.log(idsWithObjectId);
+      const query = {
+        _id: {
+          $in: idsWithObjectId
+        }
+      }
+      const result = await productCollection.find(query).toArray();
       res.send(result);
     })
 
